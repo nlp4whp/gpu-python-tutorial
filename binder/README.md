@@ -14,6 +14,37 @@ $ # From the top level of the repo.
 $ docker build -t gpu-python-tutorial:dev -f binder/Dockerfile .
 ```
 
+### Run the container
+
+``` sh
+NAME=gpu-python-tutorial:dev
+FILE=binder/Dockerfile
+
+echo "Removing old docker image ..."
+if [ "$(docker images -q $NAME)" != "" ]; then
+    echo "Removing old docker image ..."
+    docker rmi $NAME
+else
+    echo "Preparing 1st build of " $NAME
+fi
+
+echo "  -- building docker image ..."
+docker build -f $FILE -t $NAME .
+
+echo "  -- running ..."
+docker run --rm -it \
+    -p 9088:8888 \
+    -p 9087:8787 \
+    -p 9086:8786 \
+    --name pygpu \
+    --cpus=32 \
+    --memory=64g \
+    gpu-python-tutorial:dev
+
+# then run jupyter lab in container
+> jupyter lab --ip='0.0.0.0' --port='8888' --allow-root --NotebookApp.token='' --NotebookApp.password=''
+```
+
 ### Validate it with `canary`
 
 ```console
